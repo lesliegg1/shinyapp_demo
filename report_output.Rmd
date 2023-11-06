@@ -1,0 +1,43 @@
+---
+title: "Example Report Output"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: no
+    toc: no
+    toc_float: yes
+    # code_folding: hide
+    self_contained: yes
+    theme: lumen
+  pdf_document:
+    toc: no
+editor_options:
+  chunk_output_type: console
+params:
+  sigma2: NULL
+  alpha: NULL
+  sampleSize: NULL
+  effectSize: NULL
+  stat_plot: NULL
+---
+
+```{r setup, include=FALSE,echo=F}
+
+
+
+
+```
+
+Variance = `r params$sigma2`
+
+Alpha = `r params$alpha`
+
+Sample Size = `r params$sampleSize`
+
+Effect Size = `r params$effectSize`
+
+```{r plot}
+params$stat_plot
+```
+
+
