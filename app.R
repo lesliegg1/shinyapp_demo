@@ -21,7 +21,7 @@ ui <- fluidPage(
 
          radioButtons(inputId = "sigma2",
                       label = "Variance",
-                      choices = c(5, 10, 15, 20, 25),
+                      choices = c(1, 5, 10, 15, 20, 25),
                       selected = 15, inline=TRUE),
           
           # significance level
@@ -60,8 +60,8 @@ ui <- fluidPage(
           fluidRow(
             #Bonus Question
             shiny::helpText("Bonus: Calculate the sample size if the effect\n
-                             size is 10, the variance for both populations is 5, and the desired\n
-                             power is 0.8"),
+                             size is 4, the variance for both populations is 25, the alpha level\n
+                             level is 0.05, and the desired power is 0.8."),
             actionButton("go", label = "Calculate Sample Size",icon= icon("calculator"),
             style="color: #fff; background-color: #0B3188; border-color: #000000;
                                border-radius: 10px; 
@@ -88,8 +88,8 @@ server <- function(input, output,session) {
   
   # min and max of the plot, reactive to selection
   xlims <- reactive({
-    var_mean <- as.integer(input$sigma2)/input$sampleSize
-    c(-4*var_mean, input$effectSize+4*var_mean)
+    se_mean <- sqrt(as.integer(input$sigma2)/input$sampleSize)
+    c(-4*se_mean, input$effectSize+4*se_mean)
   })
   
   #plot 
@@ -97,7 +97,7 @@ server <- function(input, output,session) {
    ggplot(data.frame(x = xlims()),
                  aes(x = x)) +
       stat_function(fun = dnorm,
-                    args=c(0, as.integer(input$sigma2)/input$sampleSize),
+                    args=c(0, sqrt(as.integer(input$sigma2)/input$sampleSize)),
                     n=1000) +
       geom_text(x = 0, y = -0.05, label = "H0")+
       geom_vline(aes(xintercept = zcrit()),
@@ -109,7 +109,7 @@ server <- function(input, output,session) {
               angle = 90, 
               vjust = 1.4)+
       stat_function(fun = dnorm, 
-                    args=c(input$effectSize, as.integer(input$sigma2)/input$sampleSize), 
+                    args=c(input$effectSize, sqrt(as.integer(input$sigma2)/input$sampleSize)), 
                     n=1000)+
       geom_text(x = input$effectSize, y = -.05, label = "HA")+
       theme_bw() +
@@ -127,7 +127,7 @@ server <- function(input, output,session) {
     # Sample Size Calculation (1tailed)
     power <- 0.8
     alpha <- 0.05
-    effect_size <- 10
+    effect_size <- 4
     z_beta <- qnorm(1-power, 0, 1)
     z_alpha <- qnorm((alpha), 0, 1)
     variance <- 25
@@ -143,7 +143,8 @@ server <- function(input, output,session) {
   })
   
   exerciseText <- eventReactive(input$reveal, {
-    "Design a widget that will calculate sample size for any desired power input by the user. Assume alpha=0.05, effect size=5, and equal variance = 1"
+    "Design a widget that will calculate sample size for any desired power input by the user.\n 
+    Assume alpha=0.05, effect size=0.6, and a variance of 1 for both populations."
   })
   
   output$printExercise <- renderText({ 
