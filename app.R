@@ -14,12 +14,6 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
           
-          
-          # Travis I'm removing this because I'd rather keep it more simple
-          # radioButtons(inputId = "solveFor",label = "Solve for?",
-          #              choices = c("Power","Significance Level","Sample Size","Effect Size"),
-          #              selected = "Power"),
-          
          shiny::helpText("Use this app to explore the power of a one-tailed test for a difference in means between 
                           a test population and a reference population. Select various combinations of
                           Type I error rate (alpha), effect size (delta - the true difference in population means),
@@ -29,14 +23,6 @@ ui <- fluidPage(
                       label = "Variance",
                       choices = c(5, 10, 15, 20, 25),
                       selected = 15, inline=TRUE),
-         
-          # power 
-          # conditionalPanel(condition = "input.solveFor != 'Power'",
-          #  sliderInput(inputId = "power",
-          #              label = "Power",
-          #              min = 0,
-          #              max = 1,
-          #              value = .8)),
           
           # significance level
           sliderInput(inputId = "alpha",
@@ -74,8 +60,8 @@ ui <- fluidPage(
           fluidRow(
             #Bonus Question
             shiny::helpText("Bonus: Calculate the sample size if the effect\n
-            size is 10, the variance for both populations is 5, and the desired\n
-            power is 0.8"),
+                             size is 10, the variance for both populations is 5, and the desired\n
+                             power is 0.8"),
             actionButton("go", label = "Calculate Sample Size",icon= icon("calculator"),
             style="color: #fff; background-color: #0B3188; border-color: #000000;
                                border-radius: 10px; 
@@ -106,12 +92,6 @@ server <- function(input, output,session) {
     c(-4*var_mean, input$effectSize+4*var_mean)
   })
   
-  # h0Max <-reactive({
-  #   
-  #   as.numeric(dnorm(.5,mean = 0,sd = 15))
-  #   
-  # }) 
-  
   #plot 
   stat_plot <- reactive({
    ggplot(data.frame(x = xlims()),
@@ -139,28 +119,17 @@ server <- function(input, output,session) {
   
   # plot the distribution of the mean under the reference and test distributions
   output$distributionPlot <- renderPlot({
-    #generate a normal distribution plot
     stat_plot()
   })
   
   calculatedN <- eventReactive(input$go, {
-    # sample size calculation
-    # Leslie version
-    # power <- 0.8
-    # alpha <- 0.05
-    # effect_size <- 10
-    # z_beta <- qnorm(1-power, 0, 1)
-    # z_alpha <- qnorm(alpha, 0, 1)
-    # sigma <- 5
-    # # sample size - round up
-    # ceiling(2*((z_alpha*sigma)^2 - (z_beta*sigma)^2) / effect_size)
     
-    # Travis Version (2tailed)
+    # Sample Size Calculation (1tailed)
     power <- 0.8
     alpha <- 0.05
     effect_size <- 10
     z_beta <- qnorm(1-power, 0, 1)
-    z_alpha <- qnorm((alpha/2), 0, 1)
+    z_alpha <- qnorm((alpha), 0, 1)
     variance <- 25
     sigma = sqrt(variance)
     # sample size - round up
@@ -188,23 +157,20 @@ server <- function(input, output,session) {
     filename = "Report.html",
     content = function(file) {
       # Set up parameters to pass to Rmd document
-        par_list <- list("sigma2"=input$sigma2,
+      par_list <- list("sigma2"=input$sigma2,
                          "alpha" = input$alpha,
                          "sampleSize"=input$sampleSize,
                          "effectSize"=input$effectSize,
                          "stat_plot"=stat_plot())
-      # browser()
       
       # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
+      # child of the global environment (this isolates the code in the document rom the code in this app).
       print(str(par_list))
       
       saveRDS(par_list, file = 'diagnosis.RDS')
-      
-        rmarkdown::render("report_output.Rmd", output_file = file,
-                          params = par_list,
-                          envir = new.env(parent = globalenv()))
+      rmarkdown::render("report_output.Rmd", output_file = file,
+                        params = par_list,
+                        envir = new.env(parent = globalenv()))
     }
   )
   
