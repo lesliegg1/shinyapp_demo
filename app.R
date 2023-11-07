@@ -72,7 +72,8 @@ ui <- fluidPage(
             style="color: #fff; background-color: #087A27; border-color: #000000;
                                border-radius: 10px; 
                                border-width: 2px"),
-            textOutput("printExercise")
+            textOutput("printExercise1"),
+            textOutput("printExercise2")
           )
         )# end main
     )# end layout
@@ -151,13 +152,21 @@ server <- function(input, output,session) {
     paste("The minimum sample size is:", calculatedN())
   })
   
-  exerciseText <- eventReactive(input$reveal, {
-    "Design a widget that will calculate sample size for any desired power input by the user.\n 
-    Assume alpha=0.05, effect size=0.6, and a variance of 1 for both populations."
+  exerciseText1 <- eventReactive(input$reveal, {
+    "Option 1. Design a widget that will calculate sample size for any desired power input by the user.\n 
+    Assume alpha=0.05, effect size=0.6, and a variance of 1 for both populations." 
   })
   
-  output$printExercise <- renderText({ 
-    exerciseText()
+  exerciseText2 <- eventReactive(input$reveal, {
+    "Option 2. Create a timeseries plot of the specific conductivity data in the included file StMarysRiverOH_SondeData_25Sep-03Oct2023.xlsx that appears after pressing a 'Plot' button."
+  })
+  
+  output$printExercise1 <- renderText({ 
+    exerciseText1()
+  })
+  
+  output$printExercise2 <- renderText({ 
+    exerciseText2()
   })
   
   
