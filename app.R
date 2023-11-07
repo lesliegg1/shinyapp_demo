@@ -82,7 +82,7 @@ server <- function(input, output,session) {
 
   # critical value for the selected alpha
   zcrit <- reactive({
-    qnorm(1-input$alpha, 0, as.integer(input$sigma2)/input$sampleSize)
+    qnorm(1-input$alpha, 0, sd=sqrt(as.integer(input$sigma2)/input$sampleSize))
   }) # assuming two-tailed
   
   # min and max of the plot, reactive to selection
