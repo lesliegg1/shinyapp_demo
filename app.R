@@ -16,7 +16,8 @@ ui <- fluidPage(
          shiny::helpText("Use this app to explore the power of a one-tailed test for a difference in means between 
                           a test population and a reference population. Select various combinations of
                           Type I error rate (alpha), effect size (delta - the true difference in population means),
-                          and sample size (n). Variance is assumed to be known and equal between the two populations."),
+                          and sample size (n). Variance is assumed to be known and equal between the two populations.\n
+                         The green shaded area on the plot is the calculated power."),
 
          radioButtons(inputId = "sigma2",
                       label = "Variance",
@@ -41,7 +42,7 @@ ui <- fluidPage(
           sliderInput(inputId = "effectSize",
                        label = "Effect Size",
                        min = .5,
-                       max = 4,
+                       max = 6,
                        value = 3),
           #export a report 
           downloadButton("Report", "Generate Report")
@@ -91,6 +92,10 @@ server <- function(input, output,session) {
     c(-4*se_mean, input$effectSize+4*se_mean)
   })
   
+  power <- reactive({
+    round(1-pnorm(zcrit(), input$effectSize, sd=sqrt(as.integer(input$sigma2)/input$sampleSize)), digits=3)
+  })
+  
   #plot 
   stat_plot <- reactive({
    ggplot(data.frame(x = xlims()),
@@ -101,7 +106,7 @@ server <- function(input, output,session) {
       geom_text(x = 0, y = -0.05, label = "H0")+
       geom_vline(aes(xintercept = zcrit()),
                  linetype = c("dashed"))+
-     annotate(geom = "text",
+      annotate(geom = "text",
               label = "Zcrit",
               x = zcrit(),
               y = -0.05,
@@ -109,8 +114,13 @@ server <- function(input, output,session) {
               vjust = 1.4)+
       stat_function(fun = dnorm, 
                     args=c(input$effectSize, sqrt(as.integer(input$sigma2)/input$sampleSize)), 
-                    n=1000)+
-      geom_text(x = input$effectSize, y = -.05, label = "HA")+
+                    xlim = c(zcrit(), xlims()[2]),
+                    geom = "area", fill = "#84CA72", alpha = .2) +
+      stat_function(fun = dnorm, 
+                    args=c(input$effectSize, sqrt(as.integer(input$sigma2)/input$sampleSize)), 
+                    n=1000) +
+      geom_text(x = input$effectSize, y = -.05, label = "HA") +
+      ggtitle(paste("Power =", power())) +
       theme_bw() +
       theme(panel.border = element_blank(), panel.grid.major = element_blank(),
                          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
@@ -127,12 +137,12 @@ server <- function(input, output,session) {
     power <- 0.8
     alpha <- 0.05
     effect_size <- 4
-    z_beta <- qnorm(1-power, 0, 1)
-    z_alpha <- qnorm((alpha), 0, 1)
     variance <- 25
     sigma = sqrt(variance)
+    z_beta <- qnorm(1-power, 0, 1)
+    z_alpha <- qnorm(alpha, 0, 1)
     # sample size - round up
-    ceiling(2*(z_alpha + z_beta)^2*variance / effect_size^2)
+    ceiling((z_alpha + z_beta)^2*variance / effect_size^2)
     
     
   })
