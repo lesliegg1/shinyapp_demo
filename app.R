@@ -13,11 +13,9 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
           
-         shiny::helpText("Use this app to explore the power of a one-tailed test for a difference in means between 
-                          a test population and a reference population. Select various combinations of
-                          Type I error rate (alpha), effect size (delta - the true difference in population means),
-                          and sample size (n). Variance is assumed to be known and equal between the two populations.\n
-                         The green shaded area on the plot is the calculated power."),
+         shiny::helpText("Use this app to explore the power of a one-tailed test for testing whether the mean of a population is greater than 0. 
+                          Select various combinations of Type I error rate (alpha), effect size (delta - the true difference from 0),
+                          and sample size (n). Variance is assumed to be known.\n The green shaded area on the plot is the calculated power."),
 
          radioButtons(inputId = "sigma2",
                       label = "Variance",
@@ -60,7 +58,7 @@ ui <- fluidPage(
           fluidRow(
             #Bonus Question
             shiny::helpText("Bonus: Calculate the sample size if the effect\n
-                             size is 4, the variance for both populations is 25, the alpha level\n
+                             size is 4, the variance is 25, the alpha level\n
                              level is 0.05, and the desired power is 0.8."),
             actionButton("go", label = "Calculate Sample Size",icon= icon("calculator"),
             style="color: #fff; background-color: #0B3188; border-color: #000000;
@@ -154,7 +152,7 @@ server <- function(input, output,session) {
   
   exerciseText1 <- eventReactive(input$reveal, {
     "Option 1. Design a widget that will calculate sample size for any desired power input by the user.\n 
-    Assume alpha=0.05, effect size=0.6, and a variance of 1 for both populations." 
+    Assume alpha=0.05, effect size=0.6, and a known variance of 1." 
   })
   
   exerciseText2 <- eventReactive(input$reveal, {
